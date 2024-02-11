@@ -3,34 +3,75 @@ const topMarg = 300 //margin at top, leaves room for bricks
 
 class Paddle{
   constructor(){
-    this.position = createVector(width / 2, 30)
-    this.xlen = 40
+    this.position = createVector(width / 2, height - 30)
+    this.xlen = 60
     this.ylen = 10
-    this.moveSpeed = 5
+    this.moveSpeed = 2
   }
 
   display(){
     rectMode(CENTER)
     noStroke()
     fill(128, 128, 255)
-    rect(width / 2, 580, this.xlen, this.ylen)
+    rect(this.position.x, this.position.y, this.xlen, this.ylen)
   }
 
   move(){
+    if(keyCode == LEFT_ARROW && keyIsPressed){
+      this.position.x -= this.moveSpeed
+    }
 
+    if(keyCode == RIGHT_ARROW && keyIsPressed){
+      this.position.x += this.moveSpeed
+    }
+  }
+
+  checkCollision(ball){
+
+
+    let ballX = ball.position.x
+    let ballY = ball.position.y
+
+    let left = (this.position.x - (this.xlen / 2))
+    let right = (this.position.x + (this.xlen / 2))
+
+    let top = (this.position.y - (this.ylen / 2))
+    let btm = (this.position.y + (this.ylen / 2))
+
+    
+
+    if(ballX > left - ball.radius && ballX < right + ball.radius && ballY > top - ball.radius && ballY < btm + ball.radius){
+      
+      if(ballX > left - (ball.radius * 2) && ballX < left && ballY > top - (ball.radius * 2) && ballY < top){ //left collision
+        ball.velocity.x *= -1
+        console.log("hit left")
+      }else if(ballX > right && ballX < right + (ball.radius * 2) && ballY > top - (ball.radius * 2) && ballY < top){ //right collision
+        ball.velocity.x *= -1
+        console.log("hit right")
+      }else if(ballX > left && ballX < right && ballY > top - (ball.radius * 2) && ballY < top){ //top collision
+        ball.velocity.y *= -1
+        console.log("hit top")
+      }else if(ballX > left && ballX < right && ballY < btm + (ball.radius * 2) && ballY > btm){ //bottom collision
+        ball.velocity.y *= -1
+        console.log("hit bottom")
+      }
+      
+    }
+    
   }
 }
 
 class Ball{
   constructor(){
     this.position = createVector(random(marg, height - topMarg), random(marg, width - marg))
-    this.defaultSpeed = 5
+    this.defaultSpeed = 3
     this.velocity = createVector(random(5), random(5)).normalize().mult(this.defaultSpeed)
     
-    this.radius = 10
+    this.radius = 5
   }
 
   display(){
+    ellipseMode(RADIUS)
     noStroke()
     fill(128, 255, 128)
     ellipse(this.position.x, this.position.y, this.radius)
@@ -76,7 +117,10 @@ function setup() {
 function draw() {
   background(255, 128, 128);
 
+  paddle.move()
+
   ball.bounceEdges()
+  paddle.checkCollision(ball)
   ball.update()
   ball.display()
   paddle.display()
